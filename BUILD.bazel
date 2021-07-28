@@ -1,0 +1,55 @@
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@wpi_bazel_rules//rules:java.bzl", "wpilib_junit5_test")
+load("@wpi_bazel_rules//rules/combined_runtime:gen-combined-runtime-lib.bzl", "generate_combined_runtime_lib")
+
+generate_combined_runtime_lib(
+    name = "pathweaver_combined_libs",
+    json_file = "ResourceInformation.json",
+    deps = [
+        "@local_allwpilib//:wpimathjni",
+        "@local_allwpilib//:wpiutiljni",
+    ],
+)
+
+java_library(
+    name = "pathweaver-lib",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),
+    deps = [
+        ":pathweaver_combined_libs",
+        "@local_allwpilib//:wpimath-java",
+        "@local_allwpilib//:wpiutil-java",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:javax_measure_unit_api",
+        "@maven//:org_apache_commons_commons_csv",
+        "@maven//:org_ejml_ejml_simple",
+        "@maven//:org_fxmisc_easybind_easybind",
+        "@maven//:org_openjfx_javafx_base",
+        "@maven//:org_openjfx_javafx_controls",
+        "@maven//:org_openjfx_javafx_fxml",
+        "@maven//:org_openjfx_javafx_graphics",
+        "@maven//:si_uom_si_units",
+        "@maven//:systems_uom_systems_common",
+        "@maven//:tech_units_indriya",
+    ],
+)
+
+java_binary(
+    name = "pathweaver",
+    main_class = "edu.wpi.first.pathweaver.Main",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        ":pathweaver-lib",
+        "@maven//:com_fasterxml_jackson_core_jackson_annotations",
+        "@maven//:com_fasterxml_jackson_core_jackson_core",
+        "@maven//:com_fasterxml_jackson_core_jackson_databind",
+    ],
+)
+
+wpilib_junit5_test(
+    name = "pathweaver_test",
+    srcs = glob(["src/test/java/**/*.java"]),
+    deps = [
+        ":pathweaver-lib",
+    ],
+)
